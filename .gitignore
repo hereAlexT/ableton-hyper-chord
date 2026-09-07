@@ -1,0 +1,13 @@
+# Ableton Extensions SDK distribution — reference material only.
+# Contains vendor .tgz packages Ableton's SDK license doesn't permit redistributing.
+extensions-sdk-1.0.0-beta.1/
+
+# Node
+node_modules/
+dist/
+
+# Extension-local, machine-specific
+extension/.env
+
+# OS cruft
+.DS_Store

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hyper Chord</title>
+<script>
+  const isWebKit = window.webkit?.messageHandlers?.live;
+  const isWebView2 = window.chrome?.webview;
+  function sendMessage(message) {
+    if (isWebKit) window.webkit.messageHandlers.live.postMessage(message);
+    else if (isWebView2) window.chrome.webview.postMessage(message);
+  }
+  function closeWithResult(result) {
+    sendMessage({ method: "close_and_send", params: [JSON.stringify(result)] });
+  }
+  window.__DATA__ = /*__HYPERCHORD_DATA__*/ null;
+</script>
+<style>
+  :root {
+    --bg: #383838; --panel: #4E4E4E; --accent: #FFA500; --text: #FFFFFF;
+    --muted: #B8B8B8; --border: #2C2C2C; --row: #454545; --row-alt: #3E3E3E;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--panel); color: var(--text); font: 13px/1.4 -apple-system, "Segoe UI", sans-serif; display: flex; flex-direction: column; height: 100vh; }
+  header { padding: 12px 16px 8px; border-bottom: 1px solid var(--border); }
+  h1 { margin: 0; font-size: 15px; font-weight: 600; }
+  .sub { color: var(--muted); margin-top: 2px; }
+  main { flex: 1; overflow: auto; padding: 8px 16px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 5px 8px; white-space: nowrap; }
+  th { color: var(--muted); font-weight: 500; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--panel); }
+  tr:nth-child(even) td { background: var(--row-alt); }
+  td.chord { font-size: 16px; font-weight: 600; color: var(--accent); }
+  td.num { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .note { color: var(--muted); padding: 8px 16px; border-top: 1px solid var(--border); }
+  footer { padding: 8px 16px 12px; display: flex; justify-content: flex-end; gap: 8px; }
+  button { background: var(--accent); border: none; padding: 6px 14px; cursor: pointer; color: #000; border-radius: 3px; font-weight: 600; }
+  .empty { color: var(--muted); padding: 24px; text-align: center; }
+  code { background: var(--border); padding: 1px 5px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<header><h1 id="title"></h1><div class="sub" id="subtitle"></div></header>
+<main id="main"></main>
+<div class="note" id="note" hidden></div>
+<footer><button onclick="closeWithResult({ status: 'closed' })">Close</button></footer>
+<script>
+  const d = window.__DATA__ || {};
+  document.getElementById("title").textContent = d.title || "Hyper Chord";
+  document.getElementById("subtitle").textContent = d.subtitle || "";
+  const main = document.getElementById("main");
+  if (d.message) {
+    const p = document.createElement("div");
+    p.className = "empty";
+    p.textContent = d.message;
+    main.appendChild(p);
+  } else if (!d.rows || d.rows.length === 0) {
+    main.innerHTML = '<div class="empty">No chords found.</div>';
+  } else {
+    const keys = d.keys || ["start", "end", "chord", "roman", "notes"];
+    const cols = d.columns || ["Start", "End", "Chord", "Function", "Notes"];
+    const classes = { start: "num", end: "num", chord: "chord" };
+    const table = document.createElement("table");
+    const thead = document.createElement("thead");
+    const hr = document.createElement("tr");
+    for (const c of cols) { const th = document.createElement("th"); th.textContent = c; hr.appendChild(th); }
+    thead.appendChild(hr);
+    table.appendChild(thead);
+    const tbody = document.createElement("tbody");
+    for (const r of d.rows) {
+      const tr = document.createElement("tr");
+      for (const k of keys) {
+        const td = document.createElement("td");
+        td.className = classes[k] || "";
+        const v = r[k];
+        td.textContent = v == null ? "" : String(v);
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    main.appendChild(table);
+  }
+  if (d.note) {
+    const n = document.getElementById("note");
+    n.hidden = false;
+    n.textContent = d.note;
+  }
+</script>
+</body>
+</html>

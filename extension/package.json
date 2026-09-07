@@ -1,0 +1,32 @@
+{
+  "name": "ableton-hyper-chord",
+  "version": "0.1.0",
+  "description": "Extract chords from audio or MIDI tracks into a labelled chord track; name any selected chord.",
+  "main": "dist/extension.js",
+  "engines": {
+    "node": ">=24.14.1"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit && tsx build.ts --production",
+    "build:dev": "tsc --noEmit && tsx build.ts",
+    "start": "npm run build:dev && ableton-extensions-cli run --storage-directory .dev/storage --temp-directory .dev/tmp",
+    "package": "npm run build && ableton-extensions-cli package -o ableton-hyper-chord.ablx -i dist/crema-worker.cjs -i dist/assets -i node_modules/onnxruntime-node/package.json -i node_modules/onnxruntime-node/dist -i node_modules/onnxruntime-node/bin/napi-v6/darwin -i node_modules/onnxruntime-common",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "parity:build": "tsx tools/build-parity-ref.ts",
+    "smoke:crema": "tsx tools/smoke-crema.ts"
+  },
+  "dependencies": {
+    "@ableton-extensions/sdk": "file:./vendor/ableton-extensions-sdk-1.0.0-beta.1.tgz",
+    "onnxruntime-node": "^1.29.0"
+  },
+  "devDependencies": {
+    "@ableton-extensions/cli": "file:./vendor/ableton-extensions-cli-1.0.0-beta.1.tgz",
+    "@types/node": "^24.1.0",
+    "esbuild": "0.28.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.0"
+  }
+}

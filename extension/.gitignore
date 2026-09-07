@@ -1,0 +1,12 @@
+.DS_Store
+node_modules/
+dist/
+vendor/
+.dev/
+.parity/
+
+*.log
+*.ablx
+*.tsbuildinfo
+
+.env

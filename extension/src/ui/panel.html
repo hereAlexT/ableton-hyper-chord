@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hyper Chord Panel</title>
+<style>
+  :root { --bg: #2b2b2b; --panel: #383838; --accent: #FFA500; --text: #fff; --muted: #b0b0b0; --border: #1f1f1f; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.4 -apple-system, "Segoe UI", sans-serif; }
+  header { display: flex; align-items: baseline; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--border); background: var(--panel); }
+  h1 { margin: 0; font-size: 15px; font-weight: 600; }
+  #status { color: var(--muted); font-size: 12px; }
+  #status.live::before { content: "●"; color: #6fcf6f; margin-right: 6px; }
+  #status.dead::before { content: "●"; color: #cf6f6f; margin-right: 6px; }
+  .hero { padding: 28px 20px 12px; }
+  .hero .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  .hero .chord { font-size: 64px; font-weight: 700; color: var(--accent); line-height: 1.1; }
+  .hero .roman { font-size: 22px; color: var(--muted); }
+  .hero .key { color: var(--muted); margin-top: 4px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 20px 16px; }
+  .chip { background: var(--panel); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; }
+  .chip .c { font-weight: 600; color: var(--accent); }
+  .chip .t { color: var(--muted); font-size: 12px; margin-left: 6px; }
+  h2 { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 16px 20px 6px; }
+  ul { list-style: none; margin: 0; padding: 0 20px 24px; }
+  li { padding: 6px 0; border-bottom: 1px solid var(--border); color: var(--muted); }
+  li b { color: var(--text); }
+</style>
+</head>
+<body>
+<header><h1>Hyper Chord</h1><span id="status" class="dead">connecting…</span></header>
+<section class="hero">
+  <div class="label" id="heroLabel">Waiting for Live…</div>
+  <div class="chord" id="heroChord">—</div>
+  <div class="roman" id="heroRoman"></div>
+  <div class="key" id="heroKey"></div>
+</section>
+<div class="chips" id="chips"></div>
+<h2>History</h2>
+<ul id="history"></ul>
+<script>
+  const status = document.getElementById("status");
+  const history = document.getElementById("history");
+  function show(ev) {
+    const first = ev.rows && ev.rows[0];
+    document.getElementById("heroLabel").textContent = ev.title || "";
+    document.getElementById("heroChord").textContent = first ? first.chord : "—";
+    document.getElementById("heroRoman").textContent = first && first.roman ? first.roman : "";
+    document.getElementById("heroKey").textContent = ev.subtitle || "";
+    const chips = document.getElementById("chips");
+    chips.innerHTML = "";
+    for (const r of ev.rows || []) {
+      const d = document.createElement("div");
+      d.className = "chip";
+      d.innerHTML = '<span class="c"></span><span class="t"></span>';
+      d.querySelector(".c").textContent = r.chord + (r.roman ? "  " + r.roman : "");
+      d.querySelector(".t").textContent = r.start + " – " + r.end + (r.notes ? "  " + r.notes : "");
+      chips.appendChild(d);
+    }
+    const li = document.createElement("li");
+    const when = new Date().toLocaleTimeString();
+    li.innerHTML = "<b></b> " + when + " · " + (ev.rows || []).map((r) => r.chord).join("  ");
+    li.querySelector("b").textContent = ev.title || "";
+    history.prepend(li);
+    while (history.children.length > 50) history.removeChild(history.lastChild);
+  }
+  function connect() {
+    const es = new EventSource("/events");
+    es.onopen = () => { status.textContent = "connected to Live"; status.className = "live"; };
+    es.onmessage = (m) => { try { show(JSON.parse(m.data)); } catch (e) { console.error(e); } };
+    es.onerror = () => { status.textContent = "disconnected — retrying"; status.className = "dead"; };
+  }
+  connect();
+</script>
+</body>
+</html>
