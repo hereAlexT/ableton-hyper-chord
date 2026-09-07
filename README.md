@@ -1,4 +1,4 @@
-# ableton-hyper-chord
+# HyperChord
 
 An Ableton Live Extension that turns any audio or MIDI track into a labelled
 chord track, and names whatever chord you have selected in the piano roll.
@@ -62,7 +62,7 @@ src/ui/          modal dialog HTML, browser panel (SSE)
 ## Package
 
 ```sh
-npm run package    # -> ableton-hyper-chord-<version>.ablx
+npm run package    # -> HyperChord.ablx
 ```
 
 The archive bundles `dist/`, the model (2.1 MB) and the macOS
