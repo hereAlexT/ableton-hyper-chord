@@ -12,20 +12,20 @@ export function registerPanelCommands(context: Ctx, deps: { panel: Panel }): voi
         deps.panel.openInBrowser();
         await showMessage(
           context,
-          "Hyper Chord Panel",
+          "HyperChord Panel",
           `Open ${url} in a browser and leave it open.`,
           "Every “What's This Chord?” and “Extract Chords” result is pushed there as it happens.",
         );
       } catch (error) {
         console.error("hyper-chord: panel failed:", error);
-        await showMessage(context, "Hyper Chord Panel", error instanceof Error ? error.message : String(error));
+        await showMessage(context, "HyperChord Panel", error instanceof Error ? error.message : String(error));
       }
     })();
   });
 
   for (const scope of ["MidiClip", "MidiTrack", "AudioTrack"] as const) {
     context.ui
-      .registerContextMenuAction(scope, "Open Hyper Chord Panel…", "hyperchord.openPanel")
+      .registerContextMenuAction(scope, "Open HyperChord Panel…", "hyperchord.openPanel")
       .catch((e) => console.error(`hyper-chord: could not register panel action on ${scope}:`, e));
   }
 }

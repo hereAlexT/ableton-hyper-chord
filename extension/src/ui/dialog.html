@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hyper Chord</title>
+<title>HyperChord</title>
 <script>
   const isWebKit = window.webkit?.messageHandlers?.live;
   const isWebView2 = window.chrome?.webview;
@@ -47,7 +47,7 @@
 <footer><button onclick="closeWithResult({ status: 'closed' })">Close</button></footer>
 <script>
   const d = window.__DATA__ || {};
-  document.getElementById("title").textContent = d.title || "Hyper Chord";
+  document.getElementById("title").textContent = d.title || "HyperChord";
   document.getElementById("subtitle").textContent = d.subtitle || "";
   const main = document.getElementById("main");
   if (d.message) {

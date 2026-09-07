@@ -82,7 +82,7 @@ async function run(
     await extractChords(context, deps, track, range, target);
   } catch (error) {
     console.error("hyper-chord: extract failed:", error);
-    await showMessage(context, "Hyper Chord", error instanceof Error ? error.message : String(error));
+    await showMessage(context, "HyperChord", error instanceof Error ? error.message : String(error));
   }
 }
 

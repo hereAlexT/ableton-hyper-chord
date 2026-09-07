@@ -1,80 +1,108 @@
-# HyperChord
+# 🎹 HyperChord
 
-An Ableton Live Extension that turns any audio or MIDI track into a labelled
-chord track, and names whatever chord you have selected in the piano roll.
+**Chord detection for Ableton Live — audio or MIDI in, a labelled chord track out.**
 
-- **Extract Chords to Main Chord Track** — right-click an audio or MIDI track
-  (or a time selection on one). Chords land on a single `Master Chord Track`,
-  replacing whatever was there in that range. Run it again on other tracks or
-  sections and it keeps accumulating into the same track.
-- **Extract Chords to New Chord Track** — same, but into a fresh
-  `Chords: <track name>` track every time.
-- **What's This Chord?** — right-click a MIDI clip with some notes selected.
-- **Open Hyper Chord Panel…** — a local browser page that receives every
-  result (no modal to dismiss; park it on a second screen).
+Right-click a track, and HyperChord writes every chord it hears as a named clip on a
+dedicated chord track: `Amaj7 (VImaj7)`, `F#m7 (iv7)`, `B/D# (VII/3)`… spelled in the key of
+your Set, with the Roman-numeral function right there in the name. Ask it what any passage is,
+and it tells you.
 
-Every chord is one MIDI clip: the clip **name** is the chord symbol
-(`Bbm7`, `F/A`, `G7sus4`), spelled with sharps or flats according to the
-Set's key, and the clip **notes** are a playable voicing. Roman-numeral
-functions (`vi7`, `bVII`) are shown in the result dialogs and can be added to
-clip names via `src/settings.ts`.
+> Built on Ableton's new **Extensions SDK** (Live 12 beta). Runs entirely on your machine —
+> no accounts, no uploads, no Python.
 
-Audio is analysed with [crema](https://github.com/bmcfee/crema) (Brian
-McFee's structured chord recogniser) running on `onnxruntime-node`; the HCQT
-front end and the Viterbi decoder are a TypeScript port of the C++ in
-`music_app/packages/audio_ml_ffi`, checked against it by `test/parity.test.ts`.
-MIDI is analysed symbolically (onset clustering + template matching), no
-model needed.
+---
 
-## Requirements
+## ✨ What it does
 
-- Ableton Live 12 with Extensions support (currently the Live 12 beta from the
-  SDK's Centercode portal). Record File Type may be WAV or AIFF.
-- Node.js ≥ 24.14.
-- The Extensions SDK zip: copy `ableton-extensions-sdk-<v>.tgz` and
-  `ableton-extensions-cli-<v>.tgz` into `vendor/` (the SDK licence does not
-  allow committing them).
+- 🎚️ **Extract Chords to Main Chord Track** — right-click any audio or MIDI track (or a
+  time selection on it). Chords land on a single `Master Chord Track`, replacing whatever was
+  in that range. Run it on the piano, then the guitar, then the vocal bounce — they all
+  accumulate into one chord map of your song.
+- ➕ **Extract Chords to New Chord Track** — same analysis, into a fresh `Chords: <track>`
+  track every time. Handy for comparing takes or instruments side by side.
+- ❓ **What's This Chord?** — right-click a MIDI clip, or select a time range on a MIDI
+  track in the Arrangement and right-click. You get each chord in that span, its function
+  in the current key, and the pitch classes that make it up.
+- 🖥️ **Panel** — open `Open HyperChord Panel…` once and every result is pushed to a local
+  browser page you can park on a second screen. No modal to dismiss.
 
-## Develop
+Every chord is a real MIDI clip: the **name** is the chord symbol, the **notes** are a
+playable voicing. Loop it, transpose it, drag it onto an instrument — it's just MIDI.
+
+## 🎼 Key-aware, by design
+
+HyperChord reads the key you set in Live (`Root` / `Scale` in the Set) and uses it for:
+
+- ♯ / ♭ spelling — `Bbm7` in F major, `A#m7` in F# major, never a guess
+- Roman-numeral functions — `vi7`, `bVII`, `V7/3`, `#iv°`
+- both are shown in every result and (optionally) in the clip names
+
+## 🧠 How it hears chords
+
+| Source | Engine |
+|---|---|
+| 🎧 Audio tracks | [**crema**](https://github.com/bmcfee/crema) — Brian McFee's structured chord recogniser (ISMIR 2017), 170-chord vocabulary with inversions, running on ONNX Runtime with a from-scratch TypeScript front end |
+| 🎹 MIDI tracks | Symbolic analysis — onset clustering, template matching over 24 chord qualities, strum/arpeggio folding |
+
+Before each extraction you choose the **strum window**, **minimum chord length**, **snap
+grid**, whether to keep **slash chords** and **extensions** — and HyperChord remembers your
+choices.
+
+## ⬇️ Download & install
+
+1. Grab **`HyperChord.ablx`** from the [latest release](https://github.com/hereAlexT/ableton-hyper-chord/releases/latest).
+2. In Live: **Settings → Extensions**, make sure *Developer Mode* is **off**, and drop the
+   `.ablx` onto that page.
+3. Right-click a track. That's it.
+
+**Requirements**
+
+- Ableton Live 12 with Extensions support (currently the Live 12 **beta** from Ableton's
+  beta program)
+- macOS on Apple Silicon (the release bundles the arm64 ONNX Runtime; Intel / Windows builds
+  are a `package` script tweak away — see below)
+- Record File Type may be WAV or AIFF
+
+## ⚠️ Good to know
+
+- Audio timing assumes a **constant tempo**; tempo automation will drift.
+- crema is trained on full mixes. On a lone pad or a single guitar it can confuse close
+  relatives (`Emaj7` ↔ `G#m7`) and smooths over fast changes. If a part exists as MIDI,
+  analyse the MIDI — it's exact.
+- The SDK does not expose the piano-roll note selection, so "What's This Chord?" works on a
+  **clip** or an **Arrangement time selection**, not on notes you've highlighted in the
+  piano roll.
+- Looped MIDI clips contribute their first pass only. Session-view clip slots aren't
+  handled yet.
+
+## 🛠️ Build it yourself
 
 ```sh
+cd extension
+# copy ableton-extensions-sdk-*.tgz and ableton-extensions-cli-*.tgz from the SDK zip into vendor/
 npm install
-# .env: EXTENSION_HOST_PATH=/Applications/Ableton Live 12 Beta.app/Contents/Helpers/ExtensionHost/ExtensionHostNodeModule.node
-npm start          # build + run in Live (enable Settings → Extensions → Developer Mode first)
-npm test           # unit tests + parity against the C++ reference (if .parity/cqt_parity exists)
-npm run parity:build   # build that reference from ../../music_app (needs clang++)
-npm run smoke:crema -- path/to/song.wav   # full pipeline in-process, prints chords
-npx tsx tools/smoke-worker.ts song.wav    # same, through the worker bridge the extension uses
+npm start          # Developer Mode on in Live → builds and loads the extension
+npm test           # 57 tests, incl. parity against the C++ reference when .parity/cqt_parity exists
+npm run package    # → HyperChord.ablx
 ```
 
-Layout:
+The SDK tarballs are not in this repo (Ableton's licence doesn't allow redistributing
+them). To ship for another platform, add `node_modules/onnxruntime-node/bin/napi-v6/<platform>`
+to the `package` script in `extension/package.json`.
 
 ```
-src/analysis/    pure TypeScript, no SDK imports — unit-testable without Live
-  crema/         cqtCore, cremaFeatures, cremaDecoder, resample, pipeline, ortRunner, cremaClient
-  midiChords.ts  chordLabel.ts  keyContext.ts  audioFile.ts  fft.ts
-src/worker/      crema runtime (worker thread, or child process under Live's managed host)
-src/chordTrack/  Live glue: master track, ranges, note collection, clip writing
-src/commands/    the context-menu commands
-src/ui/          modal dialog HTML, browser panel (SSE)
+extension/src/analysis/    pure TypeScript — CQT, crema decoder, chord naming, key logic
+extension/src/worker/      the crema runtime (worker thread, or child process under Live's host)
+extension/src/chordTrack/  Live glue: master track, ranges, clip writing
+extension/src/commands/    the context-menu commands
+extension/src/ui/          dialogs, options form, browser panel
 ```
 
-## Package
+## 🙏 Credits
 
-```sh
-npm run package    # -> HyperChord.ablx
-```
+- [crema](https://github.com/bmcfee/crema) by Brian McFee — the chord model
+- [ableton-pytheory](https://github.com/kennethreitz/ableton-pytheory) — for showing how to
+  run heavy code beside Live's Extension Host
+- Ableton — for opening Live up
 
-The archive bundles `dist/`, the model (2.1 MB) and the macOS
-`onnxruntime-node` binaries. For a Windows build, add
-`node_modules/onnxruntime-node/bin/napi-v6/win32` to the `package` script.
-
-## Known limits
-
-- Seconds → beats assumes a constant tempo; tempo automation will drift.
-- Chord boundaries are snapped to a 16th-note grid and chords shorter than a
-  16th are folded into the previous one (`src/settings.ts`).
-- Looped MIDI clips contribute their first pass only.
-- The SDK has no selection-change events, so the panel updates on each
-  right-click, not as you click around the piano roll.
-- Only Arrangement clips are handled (no Session clip slots yet).
+MIT © hereAlexT
