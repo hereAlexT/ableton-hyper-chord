@@ -10,6 +10,8 @@ and it tells you.
 > Built on Ableton's new **Extensions SDK** (Live 12 beta). Runs entirely on your machine —
 > no accounts, no uploads, no Python.
 
+![A chord track written by HyperChord: named clips with playable voicings](docs/images/chord-track.jpg)
+
 ---
 
 ## ✨ What it does
@@ -28,6 +30,8 @@ and it tells you.
 
 Every chord is a real MIDI clip: the **name** is the chord symbol, the **notes** are a
 playable voicing. Loop it, transpose it, drag it onto an instrument — it's just MIDI.
+
+![HyperChord's actions in Live's Extensions context menu](docs/images/dropdown-menu.jpg)
 
 ## 🎼 Key-aware, by design
 
