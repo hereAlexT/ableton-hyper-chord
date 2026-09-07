@@ -1,6 +1,6 @@
 {
-  "name": "ableton-hyper-chord",
-  "version": "0.1.0",
+  "name": "hyperchord",
+  "version": "1.0.0",
   "description": "Extract chords from audio or MIDI tracks into a labelled chord track; name any selected chord.",
   "main": "dist/extension.js",
   "engines": {
@@ -11,7 +11,7 @@
     "build": "tsc --noEmit && tsx build.ts --production",
     "build:dev": "tsc --noEmit && tsx build.ts",
     "start": "npm run build:dev && ableton-extensions-cli run --storage-directory .dev/storage --temp-directory .dev/tmp",
-    "package": "npm run build && ableton-extensions-cli package -o ableton-hyper-chord.ablx -i dist/crema-worker.cjs -i dist/assets -i node_modules/onnxruntime-node/package.json -i node_modules/onnxruntime-node/dist -i node_modules/onnxruntime-node/bin/napi-v6/darwin -i node_modules/onnxruntime-common",
+    "package": "npm run build && ableton-extensions-cli package -o HyperChord.ablx -i dist/crema-worker.cjs -i dist/assets -i node_modules/onnxruntime-node/package.json -i node_modules/onnxruntime-node/dist -i node_modules/onnxruntime-node/bin/napi-v6/darwin -i node_modules/onnxruntime-common",
     "test": "vitest run",
     "test:watch": "vitest",
     "parity:build": "tsx tools/build-parity-ref.ts",
